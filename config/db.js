@@ -12,4 +12,24 @@ const config = {
 
 const pool = mysql.createPool(config);
 
+// Manejo de errores en la conexión:
+pool.getConnection((err, connection) => {
+  if (err) {
+    if (err.code === 'PROTOCOL_CONNECTION_LOST') {
+      console.error('Conexión a la base de datos perdida.');
+    }
+    if (err.code === 'ER_CON_COUNT_ERROR') {
+      console.error('La base de datos tiene demasiadas conexiones.');
+    }
+    if (err.code === 'ECONNREFUSED') {
+      console.error('La conexión a la base de datos fue rechazada.');
+    }
+  }
+
+  if (connection) {
+    connection.release();
+  }
+  return;
+});
+
 export const promisePool = pool.promise();
