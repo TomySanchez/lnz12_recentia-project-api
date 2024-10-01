@@ -1,8 +1,12 @@
 import express from 'express';
-import { getAllClientes } from '../controllers/clientesController.js';
+import {
+  createCliente,
+  getAllClientes
+} from '../controllers/clientesController.js';
 
 const router = express.Router();
 
 router.get('/clientes', getAllClientes);
+router.post('/clientes', createCliente);
 
 export default router;
