@@ -1,8 +1,9 @@
 import cors from 'cors';
-import express from 'express';
-import clientesRoutes from './routes/clientesRoutes.js';
-import dotenv from 'dotenv';
 import helmet from 'helmet';
+import express from 'express';
+import dotenv from 'dotenv';
+import clientesRoutes from './routes/clientesRoutes.js';
+import direccionesRoutes from './routes/direccionesRoutes.js';
 
 dotenv.config();
 
@@ -22,6 +23,7 @@ app.get('/', (req, res) => {
   res.send('Funcionando');
 });
 app.use('/api', clientesRoutes);
+app.use('/api', direccionesRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
