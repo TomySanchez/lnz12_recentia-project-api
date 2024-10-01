@@ -1,5 +1,6 @@
 import express from 'express';
 import dotenv from 'dotenv';
+import { promisePool } from './config/db.js';
 
 dotenv.config();
 
@@ -14,5 +15,7 @@ app.listen(PORT, () => {
 });
 
 app.get('/', (req, res) => {
-  http: res.send('Funcionando');
+  res.send('Funcionando');
 });
+
+console.log('promisePool:', promisePool);
