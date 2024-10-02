@@ -1,4 +1,8 @@
-import { addCliente, getClientes } from '../models/clientesModel.js';
+import {
+  addCliente,
+  getClientes,
+  updateCliente
+} from '../models/clientesModel.js';
 
 export const getAllClientes = async (req, res) => {
   try {
@@ -29,5 +33,29 @@ export const createCliente = async (req, res) => {
   } catch (err) {
     console.log(err);
     res.status(500).json({ error: 'Error al añadir el cliente' });
+  }
+};
+
+export const updateClienteById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const data = req.body;
+
+    if (!data.nombre || !data.idDireccion) {
+      return res.status(400).json({
+        error: 'El nombre y la dirección del cliente son campos obligatorios'
+      });
+    }
+
+    const result = await updateCliente(id, data);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Cliente no encontrado' });
+    }
+
+    res.status(200).json({ message: 'Cliente actualizado correctamente' });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ error: 'Error al actualizar el cliente' });
   }
 };

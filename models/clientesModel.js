@@ -19,3 +19,23 @@ export const addCliente = async (data) => {
   ]);
   return result;
 };
+
+export const updateCliente = async (id, clienteData) => {
+  const { nombre, telefono, cuit_cuil, observaciones, idDireccion } =
+    clienteData;
+  const query = `
+    UPDATE Clientes
+    SET nombre = ?, telefono = ?, cuit_cuil = ?, observaciones = ?, idDireccion = ?
+    WHERE id = ?
+  `;
+
+  const [result] = await promisePool.query(query, [
+    nombre,
+    telefono,
+    cuit_cuil,
+    observaciones,
+    idDireccion,
+    id
+  ]);
+  return result;
+};
