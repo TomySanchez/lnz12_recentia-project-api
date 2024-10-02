@@ -50,3 +50,14 @@ export const disableCliente = async (id) => {
   const [result] = await promisePool.query(query, [id]);
   return result;
 };
+
+export const enableCliente = async (id) => {
+  const query = `
+    UPDATE Clientes
+    SET activo = 1
+    WHERE id = ?
+  `;
+
+  const [result] = await promisePool.query(query, [id]);
+  return result;
+};

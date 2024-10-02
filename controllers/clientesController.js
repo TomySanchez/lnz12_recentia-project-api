@@ -1,6 +1,7 @@
 import {
   addCliente,
   disableCliente,
+  enableCliente,
   getClientes,
   updateCliente
 } from '../models/clientesModel.js';
@@ -75,5 +76,22 @@ export const disableClienteById = async (req, res) => {
   } catch (err) {
     console.log(err);
     res.status(500).json({ error: 'Error al desactivar el cliente' });
+  }
+};
+
+export const enableClienteById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const result = await enableCliente(id);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Cliente no encontrado' });
+    }
+
+    res.status(200).json({ message: 'Cliente activado correctamente' });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ error: 'Error al activar el cliente' });
   }
 };
