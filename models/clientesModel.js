@@ -39,3 +39,14 @@ export const updateCliente = async (id, clienteData) => {
   ]);
   return result;
 };
+
+export const disableCliente = async (id) => {
+  const query = `
+    UPDATE Clientes
+    SET activo = 0
+    WHERE id = ?
+  `;
+
+  const [result] = await promisePool.query(query, [id]);
+  return result;
+};
