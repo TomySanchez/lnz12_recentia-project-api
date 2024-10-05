@@ -3,7 +3,15 @@ import { addBarrio, getBarrios } from '../models/barriosModel.js';
 export const getAllBarrios = async (req, res) => {
   try {
     const barrios = await getBarrios();
-    res.status(200).json(barrios);
+
+    const formattedBarrios = barrios.map((barrio) => ({
+      id: barrio.id,
+      nombre: barrio.nombre,
+      idLocalidad: barrio.idLocalidad,
+      localidad: barrio.localidad
+    }));
+
+    res.status(200).json(formattedBarrios);
   } catch (err) {
     console.log(err);
     res.status(500).json({ error: 'Error al obtener los barrios' });

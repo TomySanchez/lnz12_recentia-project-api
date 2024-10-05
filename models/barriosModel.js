@@ -1,7 +1,15 @@
 import { promisePool } from '../config/db.js';
 
 export const getBarrios = async () => {
-  const [rows] = await promisePool.query('SELECT * FROM Barrios');
+  const [rows] = await promisePool.query(`
+      SELECT
+        b.id,
+        b.nombre,
+        b.idLocalidad,
+        l.nombre AS localidad
+      FROM Barrios b
+      JOIN Localidades l ON l.id = b.idLocalidad;
+    `);
   return rows;
 };
 
