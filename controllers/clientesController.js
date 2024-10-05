@@ -5,6 +5,7 @@ import {
   getClientes,
   updateCliente
 } from '../models/clientesModel.js';
+import { addDireccion } from '../models/direccionesModel.js';
 
 export const getAllClientes = async (req, res) => {
   try {
@@ -39,19 +40,45 @@ export const getAllClientes = async (req, res) => {
 
 export const createCliente = async (req, res) => {
   try {
-    const nuevoCliente = req.body;
+    const nuevaDireccion = req.body.direccion;
+    const nuevoCliente = req.body.cliente;
 
-    if (!nuevoCliente.nombre || !nuevoCliente.idDireccion) {
+    // Crear dirección:
+    if (
+      !nuevaDireccion.calle ||
+      !nuevaDireccion.numero ||
+      !nuevaDireccion.idBarrio
+    ) {
       return res.status(400).json({
-        error: 'El nombre y la dirección del cliente son campos obligatorios'
+        error:
+          'La calle, el número y el ID del barrio de la dirección son campos obligatorios'
       });
     }
 
-    const result = await addCliente(nuevoCliente);
+    const resultDireccion = await addDireccion(nuevaDireccion);
+    const idDireccion = resultDireccion.insertId;
+
+    if (!idDireccion) {
+      return res.status(500).json({
+        error: 'Error al añadir la dirección',
+        result: resultDireccion
+      });
+    }
+
+    // Crear cliente:
+    if (!nuevoCliente.nombre) {
+      return res.status(400).json({
+        error: 'El nombre del cliente es un campo obligatorio'
+      });
+    }
+
+    nuevoCliente.idDireccion = idDireccion;
+
+    const resultCliente = await addCliente(nuevoCliente);
 
     res.status(201).json({
       message: 'Cliente añadido correctamente',
-      clienteId: result.insertId
+      clienteId: resultCliente.insertId
     });
   } catch (err) {
     console.log(err);
