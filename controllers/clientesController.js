@@ -9,7 +9,28 @@ import {
 export const getAllClientes = async (req, res) => {
   try {
     const clientes = await getClientes();
-    res.status(200).json(clientes);
+
+    const formattedClientes = clientes.map((cliente) => ({
+      id: cliente.idCliente,
+      nombre: cliente.nombre,
+      telefono: cliente.telefono,
+      cuit_cuil: cliente.cuit_cuil,
+      observaciones: cliente.observaciones,
+      activo: cliente.activo,
+      direccion: {
+        idDireccion: cliente.idDireccion,
+        calle: cliente.calle,
+        numero: cliente.numero,
+        piso: cliente.piso,
+        departamento: cliente.departamento,
+        idBarrio: cliente.idBarrio,
+        barrio: cliente.barrio,
+        idLocalidad: cliente.idLocalidad,
+        localidad: cliente.localidad
+      }
+    }));
+
+    res.status(200).json(formattedClientes);
   } catch (err) {
     console.log(err);
     res.status(500).json({ error: 'Error al obtener los clientes' });

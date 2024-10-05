@@ -12,11 +12,7 @@ dotenv.config();
 const app = express();
 
 // MIDDLEWARES GLOBALES:
-app.use(
-  cors({
-    origin: 'http://localhost:1573'
-  })
-);
+app.use(cors());
 app.use(helmet());
 app.use(express.json());
 
