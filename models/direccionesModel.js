@@ -21,3 +21,23 @@ export const addDireccion = async (data) => {
   ]);
   return result;
 };
+
+export const updateDireccion = async (id, direccionData) => {
+  const { calle, numero, piso, departamento, idBarrio } = direccionData;
+
+  const query = `
+    UPDATE Direcciones
+    SET calle = ?, numero = ?, piso = ?, departamento = ?, idBarrio = ?
+    WHERE id = ?
+  `;
+
+  const [result] = await promisePool.query(query, [
+    calle,
+    numero,
+    piso,
+    departamento,
+    idBarrio,
+    id
+  ]);
+  return result;
+};

@@ -46,11 +46,10 @@ export const addCliente = async (data) => {
 };
 
 export const updateCliente = async (id, clienteData) => {
-  const { nombre, telefono, cuit_cuil, observaciones, idDireccion } =
-    clienteData;
+  const { nombre, telefono, cuit_cuil, observaciones } = clienteData;
   const query = `
     UPDATE Clientes
-    SET nombre = ?, telefono = ?, cuit_cuil = ?, observaciones = ?, idDireccion = ?
+    SET nombre = ?, telefono = ?, cuit_cuil = ?, observaciones = ?
     WHERE id = ?
   `;
 
@@ -59,7 +58,6 @@ export const updateCliente = async (id, clienteData) => {
     telefono,
     cuit_cuil,
     observaciones,
-    idDireccion,
     id
   ]);
   return result;

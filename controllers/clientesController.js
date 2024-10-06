@@ -5,7 +5,7 @@ import {
   getClientes,
   updateCliente
 } from '../models/clientesModel.js';
-import { addDireccion } from '../models/direccionesModel.js';
+import { addDireccion, updateDireccion } from '../models/direccionesModel.js';
 
 export const getAllClientes = async (req, res) => {
   try {
@@ -90,18 +90,46 @@ export const createCliente = async (req, res) => {
 export const updateClienteById = async (req, res) => {
   try {
     const { id } = req.params;
-    const data = req.body;
+    const dataCliente = req.body.cliente;
+    const dataDireccion = req.body.direccion;
 
-    if (!data.nombre || !data.idDireccion) {
+    // Editar dirección:
+    if (
+      !dataDireccion.calle ||
+      !dataDireccion.numero ||
+      !dataDireccion.idBarrio
+    ) {
       return res.status(400).json({
-        error: 'El nombre y la dirección del cliente son campos obligatorios'
+        error:
+          'La calle, el número y el ID del barrio de la dirección son campos obligatorios'
       });
     }
 
-    const result = await updateCliente(id, data);
+    const idDireccion = dataDireccion.idDireccion;
 
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ error: 'Cliente no encontrado' });
+    const resultDireccion = await updateDireccion(idDireccion, dataDireccion);
+
+    if (resultDireccion.affectedRows === 0) {
+      return res.status(404).json({
+        error:
+          'Dirección no encontrada. No se actualizó la dirección ni el cliente'
+      });
+    }
+
+    // Editar cliente:
+    if (!dataCliente.nombre) {
+      return res.status(400).json({
+        error: 'El nombre del cliente es un campo obligatorio'
+      });
+    }
+
+    const resultCliente = await updateCliente(id, dataCliente);
+
+    if (resultCliente.affectedRows === 0) {
+      return res.status(404).json({
+        error:
+          'Cliente no encontrado. Se actualizó la dirección pero no el cliente'
+      });
     }
 
     res.status(200).json({ message: 'Cliente actualizado correctamente' });
