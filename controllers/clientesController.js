@@ -78,7 +78,8 @@ export const createCliente = async (req, res) => {
 
     res.status(201).json({
       message: 'Cliente añadido correctamente',
-      clienteId: resultCliente.insertId
+      clienteId: resultCliente.insertId,
+      direccionId: idDireccion
     });
   } catch (err) {
     console.log(err);
