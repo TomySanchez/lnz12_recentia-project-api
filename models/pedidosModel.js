@@ -16,6 +16,24 @@ export const getPedidos = async () => {
       LEFT JOIN DetallesDePedidos dp ON dp.idPedido = p.id;
     `);
 
-  console.log('rows:', rows);
   return rows;
+};
+
+export const addPedido = async (data) => {
+  const { fechaRegistro, esRecurrente, cantSemanas, estado, idCliente } = data;
+
+  const query = `
+    INSERT INTO Pedidos (fechaRegistro, esRecurrente, cantSemanas, estado, idCliente)
+    VALUES (?, ?, ?, ?, ?);
+  `;
+
+  const [result] = await promisePool.query(query, [
+    fechaRegistro,
+    esRecurrente,
+    cantSemanas,
+    estado,
+    idCliente
+  ]);
+
+  return result;
 };
