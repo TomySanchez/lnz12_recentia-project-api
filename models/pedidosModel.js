@@ -37,3 +37,24 @@ export const addPedido = async (data) => {
 
   return result;
 };
+
+export const updatePedido = async (id, pedidoData) => {
+  const { fechaRegistro, esRecurrente, cantSemanas, estado, idCliente } =
+    pedidoData;
+
+  const query = `
+    UPDATE Pedidos
+    SET fechaRegistro = ?, esRecurrente = ?, cantSemanas = ?, estado = ?, idCliente = ?
+    WHERE id = ?
+  `;
+
+  const [result] = await promisePool.query(query, [
+    fechaRegistro,
+    esRecurrente,
+    cantSemanas,
+    estado,
+    idCliente,
+    id
+  ]);
+  return result;
+};

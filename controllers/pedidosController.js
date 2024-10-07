@@ -1,5 +1,10 @@
-import { addDetallePedido } from '../models/detallesPedidosModel.js';
-import { addPedido, getPedidos } from '../models/pedidosModel.js';
+import {
+  addDetallePedido,
+  deleteDetallePedido,
+  getDetallesPedidoByPedidoId,
+  updateDetallePedido
+} from '../models/detallesPedidosModel.js';
+import { addPedido, getPedidos, updatePedido } from '../models/pedidosModel.js';
 
 export const getAllPedidos = async (req, res) => {
   try {
@@ -107,5 +112,107 @@ export const createPedido = async (req, res) => {
   } catch (err) {
     console.log(err);
     res.status(500).json({ error: 'Error al añadir el pedido' });
+  }
+};
+
+export const updatePedidoById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { pedido: dataPedido, detallesPedido: dataDetallesPedido } = req.body;
+
+    // Editar pedido:
+    if (
+      !dataPedido.fechaRegistro ||
+      !dataPedido.estado ||
+      !dataPedido.idCliente
+    ) {
+      return res.status(400).json({
+        error:
+          'El ID del cliente, la fecha de registro y el estado del pedido son campos obligatorios'
+      });
+    }
+
+    const resultPedido = await updatePedido(id, dataPedido);
+
+    if (resultPedido.affectedRows === 0) {
+      return res.status(404).json({
+        error:
+          'Pedido no encontrado. No se actualizó el pedido ni los detalles.'
+      });
+    }
+
+    // Editar detalles de pedido:
+
+    // Obtiene los IDs de los detalles existentes en la base de datos:
+    const detallesExistentes = await getDetallesPedidoByPedidoId(id);
+    const idsDetallesExistentes = detallesExistentes.map(
+      (detalle) => detalle.idDetallePedido
+    );
+
+    // Si hay detalles, los procesa:
+    let detallesActualizados = [];
+
+    if (dataDetallesPedido && dataDetallesPedido.length > 0) {
+      for (const detalle of dataDetallesPedido) {
+        if (!detalle.idProducto || !detalle.cantidad) {
+          return res.status(400).json({
+            error:
+              'El ID del producto y la cantidad son campos obligatorios en los detalles del pedido'
+          });
+        }
+
+        // Si el detalle tiene un idDetallePedido, se actualiza. Sino se inserta:
+        if (detalle.idDetallePedido) {
+          const resultDetalle = await updateDetallePedido(
+            detalle.idDetallePedido,
+            {
+              idPedido: id,
+              idProducto: detalle.idProducto,
+              cantidad: detalle.cantidad
+            }
+          );
+
+          if (resultDetalle.affectedRows === 0) {
+            return res.status(404).json({
+              error: `Detalle de pedido con ID ${detalle.idDetallePedido} no encontrado. No se actualizó el detalle.`
+            });
+          }
+          detallesActualizados.push(detalle.idDetallePedido);
+
+          // Elimina el ID de los detalles existentes que se están actualizando:
+          idsDetallesExistentes.splice(
+            idsDetallesExistentes.indexOf(detalle.idDetallePedido),
+            1
+          );
+        } else {
+          // Si no tiene un idDetallePedido, lo agrega:
+          const resultNuevoDetalle = await addDetallePedido({
+            idPedido: id,
+            idProducto: detalle.idProducto,
+            cantidad: detalle.cantidad
+          });
+
+          detallesActualizados.push(resultNuevoDetalle.insertId);
+        }
+      }
+    }
+
+    // Elimina los detalles que ya no están en el cuerpo de la solicitud:
+    if (idsDetallesExistentes.length > 0) {
+      for (const idDetalleEliminar of idsDetallesExistentes) {
+        await deleteDetallePedido(idDetalleEliminar);
+      }
+    }
+
+    res.status(200).json({
+      message: 'Pedido y sus detalles actualizados correctamente',
+      detallesActualizados:
+        detallesActualizados.length > 0 ? detallesActualizados : [],
+      detallesEliminados:
+        idsDetallesExistentes.length > 0 ? idsDetallesExistentes : []
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ error: 'Error al actualizar el pedido' });
   }
 };

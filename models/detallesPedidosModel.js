@@ -16,3 +16,42 @@ export const addDetallePedido = async (data) => {
 
   return result;
 };
+
+export const updateDetallePedido = async (id, detallePedidoData) => {
+  const { idPedido, idProducto, cantidad } = detallePedidoData;
+
+  const query = `
+    UPDATE DetallesDePedidos
+    SET idPedido = ?, idProducto = ?, cantidad = ?
+    WHERE id = ?
+  `;
+
+  const [result] = await promisePool.query(query, [
+    idPedido,
+    idProducto,
+    cantidad,
+    id
+  ]);
+  return result;
+};
+
+export const getDetallesPedidoByPedidoId = async (idPedido) => {
+  const query = `
+    SELECT id AS idDetallePedido, idProducto, cantidad
+    FROM DetallesDePedidos
+    WHERE idPedido = ?
+  `;
+
+  const [rows] = await promisePool.query(query, [idPedido]);
+  return rows;
+};
+
+export const deleteDetallePedido = async (idDetallePedido) => {
+  const query = `
+    DELETE FROM DetallesDePedidos
+    WHERE id = ?
+  `;
+
+  const [result] = await promisePool.query(query, [idDetallePedido]);
+  return result;
+};
