@@ -9,6 +9,7 @@ export const getPedidos = async () => {
         p.cantSemanas,
         p.estado,
         p.idCliente,
+        p.activo,
         dp.id AS idDetallePedido,
         dp.cantidad,
         dp.idProducto

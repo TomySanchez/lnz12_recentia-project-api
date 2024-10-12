@@ -32,6 +32,7 @@ export const getAllPedidos = async (req, res) => {
           cantSemanas: pedido.cantSemanas,
           estado: pedido.estado,
           idCliente: pedido.idCliente,
+          activo: pedido.activo,
           // Solo agrega la propiedad 'detallesPedido' si hay detalles:
           detallesPedido: pedido.idDetallePedido
             ? [
