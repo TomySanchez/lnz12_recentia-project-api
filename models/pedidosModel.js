@@ -22,13 +22,17 @@ export const getPedidos = async () => {
 export const addPedido = async (data) => {
   const { fechaRegistro, esRecurrente, cantSemanas, estado, idCliente } = data;
 
+  const formattedFechaRegistro = new Date(fechaRegistro)
+    .toISOString()
+    .split('T')[0];
+
   const query = `
     INSERT INTO Pedidos (fechaRegistro, esRecurrente, cantSemanas, estado, idCliente)
     VALUES (?, ?, ?, ?, ?);
   `;
 
   const [result] = await promisePool.query(query, [
-    fechaRegistro,
+    formattedFechaRegistro,
     esRecurrente,
     cantSemanas,
     estado,
