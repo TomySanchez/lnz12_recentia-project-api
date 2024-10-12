@@ -46,6 +46,10 @@ export const updatePedido = async (id, pedidoData) => {
   const { fechaRegistro, esRecurrente, cantSemanas, estado, idCliente } =
     pedidoData;
 
+  const formattedFechaRegistro = new Date(fechaRegistro)
+    .toISOString()
+    .split('T')[0];
+
   const query = `
     UPDATE Pedidos
     SET fechaRegistro = ?, esRecurrente = ?, cantSemanas = ?, estado = ?, idCliente = ?
@@ -53,7 +57,7 @@ export const updatePedido = async (id, pedidoData) => {
   `;
 
   const [result] = await promisePool.query(query, [
-    fechaRegistro,
+    formattedFechaRegistro,
     esRecurrente,
     cantSemanas,
     estado,
