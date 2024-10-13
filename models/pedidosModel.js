@@ -67,3 +67,14 @@ export const updatePedido = async (id, pedidoData) => {
   ]);
   return result;
 };
+
+export const disablePedido = async (id) => {
+  const query = `
+    UPDATE Pedidos
+    SET activo = 0
+    WHERE id = ?
+  `;
+
+  const [result] = await promisePool.query(query, [id]);
+  return result;
+};
