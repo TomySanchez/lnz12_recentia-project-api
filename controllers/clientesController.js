@@ -9,29 +9,49 @@ import { addDireccion, updateDireccion } from '../models/direccionesModel.js';
 
 export const getAllClientes = async (req, res) => {
   try {
-    const clientes = await getClientes();
+    const clientesData = await getClientes();
 
-    const formattedClientes = clientes.map((cliente) => ({
-      id: cliente.idCliente,
-      nombre: cliente.nombre,
-      telefono: cliente.telefono,
-      cuit_cuil: cliente.cuit_cuil,
-      observaciones: cliente.observaciones,
-      activo: cliente.activo,
-      direccion: {
-        idDireccion: cliente.idDireccion,
-        calle: cliente.calle,
-        numero: cliente.numero,
-        piso: cliente.piso,
-        departamento: cliente.departamento,
-        idBarrio: cliente.idBarrio,
-        barrio: cliente.barrio,
-        idLocalidad: cliente.idLocalidad,
-        localidad: cliente.localidad
+    const clientes = [];
+    const clientesMap = {};
+
+    clientesData.forEach((cliente) => {
+      if (!clientesMap[cliente.idCliente]) {
+        clientesMap[cliente.idCliente] = {
+          id: cliente.idCliente,
+          nombre: cliente.nombre,
+          telefono: cliente.telefono,
+          cuit_cuil: cliente.cuit_cuil,
+          observaciones: cliente.observaciones,
+          activo: cliente.activo,
+          direccion: {
+            idDireccion: cliente.idDireccion,
+            calle: cliente.calle,
+            numero: cliente.numero,
+            piso: cliente.piso,
+            departamento: cliente.departamento,
+            idBarrio: cliente.idBarrio,
+            barrio: cliente.barrio,
+            idLocalidad: cliente.idLocalidad,
+            localidad: cliente.localidad
+          },
+          disponibilidades: []
+        };
+        clientes.push(clientesMap[cliente.idCliente]);
       }
-    }));
 
-    res.status(200).json(formattedClientes);
+      // Agregar disponibilidad (si existe):
+      if (cliente.idDiaSemana) {
+        clientesMap[cliente.idCliente].disponibilidades.push({
+          idDiaSemana: cliente.idDiaSemana,
+          nroDiaSemana: cliente.nroOrdenSemana,
+          diaSemana: cliente.diaSemana,
+          horaInicio: cliente.horaInicio,
+          horaFin: cliente.horaFin
+        });
+      }
+    });
+
+    res.status(200).json(clientes);
   } catch (err) {
     console.log(err);
     res.status(500).json({ error: 'Error al obtener los clientes' });

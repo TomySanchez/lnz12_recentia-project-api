@@ -17,7 +17,12 @@ export const getClientes = async () => {
         d.idBarrio,
         b.nombre AS barrio,
         l.id AS idLocalidad,
-        l.nombre AS localidad
+        l.nombre AS localidad,
+        di.id AS idDiaSemana,
+        di.nroOrdenSemana,
+        di.nombre AS diaSemana,
+        disp.horaInicio,
+        disp.horaFin
       FROM
         Clientes c
       JOIN
@@ -25,7 +30,13 @@ export const getClientes = async () => {
       JOIN
         Barrios b ON d.idBarrio = b.id
       JOIN
-        Localidades l ON b.idLocalidad = l.id;
+        Localidades l ON b.idLocalidad = l.id
+      LEFT JOIN
+        Disponibilidades disp ON disp.idCliente = c.id
+      LEFT JOIN
+        DiasSemana di ON disp.idDiaSemana = di.id
+      ORDER BY
+        c.id, di.nroOrdenSemana;
     `);
   return rows;
 };
