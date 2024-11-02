@@ -6,6 +6,7 @@ import {
   updateCliente
 } from '../models/clientesModel.js';
 import { addDireccion, updateDireccion } from '../models/direccionesModel.js';
+import { addDisponibilidad } from '../models/disponibilidadesModel.js';
 
 export const getAllClientes = async (req, res) => {
   try {
@@ -62,6 +63,7 @@ export const createCliente = async (req, res) => {
   try {
     const nuevaDireccion = req.body.direccion;
     const nuevoCliente = req.body.cliente;
+    const disponibilidades = req.body.disponibilidades;
 
     // Crear dirección:
     if (
@@ -95,11 +97,44 @@ export const createCliente = async (req, res) => {
     nuevoCliente.idDireccion = idDireccion;
 
     const resultCliente = await addCliente(nuevoCliente);
+    const idCliente = resultCliente.insertId;
+
+    // Crear disponibilidades:
+    const idsDisponibilidades = [];
+
+    if (disponibilidades && Array.isArray(disponibilidades)) {
+      const disponibilidadPromises = disponibilidades.map((disp) => {
+        if (!disp.idDiaSemana || !disp.horaInicio || !disp.horaFin) {
+          return Promise.reject(
+            new Error(
+              'Cada disponibilidad debe tener idDiaSemana, horaInicio y horaFin'
+            )
+          );
+        }
+
+        return addDisponibilidad({
+          idCliente,
+          idDiaSemana: disp.idDiaSemana,
+          horaInicio: disp.horaInicio,
+          horaFin: disp.horaFin
+        }).then((result) => {
+          idsDisponibilidades.push(result.insertId);
+        });
+      });
+
+      await Promise.all(disponibilidadPromises).catch((err) => {
+        console.error('Error al añadir las disponibilidades del cliente:', err);
+        return res.status(500).json({
+          error: 'Error al añadir las disponibilidades del cliente'
+        });
+      });
+    }
 
     res.status(201).json({
       message: 'Cliente añadido correctamente',
-      clienteId: resultCliente.insertId,
-      direccionId: idDireccion
+      clienteId: idCliente,
+      direccionId: idDireccion,
+      disponibilidadesIds: idsDisponibilidades
     });
   } catch (err) {
     console.log(err);
