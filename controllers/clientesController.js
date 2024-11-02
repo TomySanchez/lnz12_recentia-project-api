@@ -6,7 +6,12 @@ import {
   updateCliente
 } from '../models/clientesModel.js';
 import { addDireccion, updateDireccion } from '../models/direccionesModel.js';
-import { addDisponibilidad } from '../models/disponibilidadesModel.js';
+import {
+  addDisponibilidad,
+  deleteDisponibilidad,
+  getDisponibilidadesByClienteId,
+  updateDisponibilidad
+} from '../models/disponibilidadesModel.js';
 
 export const getAllClientes = async (req, res) => {
   try {
@@ -43,6 +48,7 @@ export const getAllClientes = async (req, res) => {
       // Agregar disponibilidad (si existe):
       if (cliente.idDiaSemana) {
         clientesMap[cliente.idCliente].disponibilidades.push({
+          idDisponibilidad: cliente.idDisponibilidad,
           idDiaSemana: cliente.idDiaSemana,
           nroDiaSemana: cliente.nroOrdenSemana,
           diaSemana: cliente.diaSemana,
@@ -147,6 +153,7 @@ export const updateClienteById = async (req, res) => {
     const { id } = req.params;
     const dataCliente = req.body.cliente;
     const dataDireccion = req.body.direccion;
+    const dataDisponibilidades = req.body.disponibilidades;
 
     // Editar dirección:
     if (
@@ -185,6 +192,57 @@ export const updateClienteById = async (req, res) => {
         error:
           'Cliente no encontrado. Se actualizó la dirección pero no el cliente'
       });
+    }
+
+    // Editar disponibilidades:
+    if (dataDisponibilidades && Array.isArray(dataDisponibilidades)) {
+      // Obtener disponibilidades existentes:
+      const existingDisponibilidades = await getDisponibilidadesByClienteId(id);
+      const existingIds = existingDisponibilidades.map((disp) => disp.id);
+
+      const updatedIds = [];
+
+      for (const disp of dataDisponibilidades) {
+        // Verificar que los campos requeridos estén presentes, pero permitir que `id` sea opcional
+        if (!disp.idDiaSemana || !disp.horaInicio || !disp.horaFin) {
+          return res.status(400).json({
+            error:
+              'Cada disponibilidad debe tener idDiaSemana, horaInicio y horaFin'
+          });
+        }
+
+        // Si el ID es proporcionado, validar que se esté tratando de actualizar o insertar correctamente
+        if (disp.id) {
+          // Si la disponibilidad ya existe, se actualiza:
+          if (existingIds.includes(disp.id)) {
+            await updateDisponibilidad(disp.id, {
+              idDiaSemana: disp.idDiaSemana,
+              horaInicio: disp.horaInicio,
+              horaFin: disp.horaFin
+            });
+            updatedIds.push(disp.id);
+          } else {
+            return res.status(400).json({
+              error: `La disponibilidad con ID ${disp.id} no existe`
+            });
+          }
+        } else {
+          // Si no se proporciona un ID, se inserta como nueva disponibilidad
+          const resultNuevo = await addDisponibilidad({
+            idCliente: id,
+            idDiaSemana: disp.idDiaSemana,
+            horaInicio: disp.horaInicio,
+            horaFin: disp.horaFin
+          });
+          updatedIds.push(resultNuevo.insertId);
+        }
+      }
+
+      // Eliminar las disponibilidades que faltan:
+      const idsToDelete = existingIds.filter((id) => !updatedIds.includes(id));
+      for (const idEliminar of idsToDelete) {
+        await deleteDisponibilidad(idEliminar);
+      }
     }
 
     res.status(200).json({ message: 'Cliente actualizado correctamente' });

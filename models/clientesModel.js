@@ -21,6 +21,7 @@ export const getClientes = async () => {
         di.id AS idDiaSemana,
         di.nroOrdenSemana,
         di.nombre AS diaSemana,
+        disp.id AS idDisponibilidad,
         disp.horaInicio,
         disp.horaFin
       FROM
