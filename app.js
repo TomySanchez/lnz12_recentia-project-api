@@ -10,6 +10,7 @@ import pedidosRoutes from './routes/pedidosRoutes.js';
 import diasSemanaRoutes from './routes/diasSemanaRoutes.js';
 import entregasRoutes from './routes/entregasRoutes.js';
 import recorridosRoutes from './routes/recorridosRoutes.js';
+import pagosRoutes from './routes/pagosRoutes.js';
 
 dotenv.config();
 
@@ -32,6 +33,7 @@ app.use('/api', pedidosRoutes);
 app.use('/api', diasSemanaRoutes);
 app.use('/api', entregasRoutes);
 app.use('/api', recorridosRoutes);
+app.use('/api', pagosRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
