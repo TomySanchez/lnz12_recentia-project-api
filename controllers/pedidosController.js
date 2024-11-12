@@ -1,9 +1,12 @@
+import { addDetalleEntrega } from '../models/detallesEntregasModel.js';
 import {
   addDetallePedido,
   deleteDetallePedido,
   getDetallesPedidoByPedidoId,
   updateDetallePedido
 } from '../models/detallesPedidosModel.js';
+import { addEntrega } from '../models/entregasModel.js';
+import { addPago } from '../models/pagosModel.js';
 import {
   addPedido,
   disablePedido,
@@ -108,6 +111,45 @@ export const createPedido = async (req, res) => {
         const resultDetalle = await addDetallePedido(detalle);
         detallesPedidoIds.push(resultDetalle.insertId); // Guarda cada insertId de los detalles
       }
+    }
+
+    // Crear pago:
+    const resultPago = await addPago({ estado: 'Pendiente' });
+    const idPago = resultPago.insertId;
+
+    if (!idPago) {
+      return res.status(500).json({
+        error: 'Error al añadir el pago asociado al pedido',
+        result: resultEntrega
+      });
+    }
+
+    // Crear entrega:
+    const resultEntrega = await addEntrega({
+      estado: 'Sin programar',
+      idPedido: idPedido,
+      idPago: idPago
+    });
+    const idEntrega = resultEntrega.insertId;
+
+    if (!idEntrega) {
+      return res.status(500).json({
+        error: 'Error al añadir la entrega asociada al pedido',
+        result: resultEntrega
+      });
+    }
+
+    // Crear detalles de entrega:
+    let detallesEntregaIds = [];
+    for (const detallePedido of nuevosDetallesPedido) {
+      const detalleEntrega = {
+        idEntrega: idEntrega,
+        idProducto: detallePedido.idProducto,
+        cantidad: detallePedido.cantidad
+      };
+
+      const resultDetalleEntrega = await addDetalleEntrega(detalleEntrega);
+      detallesEntregaIds.push(resultDetalleEntrega.insertId);
     }
 
     res.status(201).json({

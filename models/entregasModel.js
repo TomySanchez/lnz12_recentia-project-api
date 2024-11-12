@@ -18,3 +18,16 @@ export const getEntregas = async () => {
 
   return rows;
 };
+
+export const addEntrega = async (data) => {
+  const { estado, idPedido, idPago } = data;
+
+  const query = `
+    INSERT INTO Entregas (estado, idPedido, idPago)
+    VALUES (?, ?, ?);
+  `;
+
+  const [result] = await promisePool.query(query, [estado, idPedido, idPago]);
+
+  return result;
+};

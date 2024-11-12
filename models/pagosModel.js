@@ -15,3 +15,16 @@ export const getPagos = async () => {
   `);
   return rows;
 };
+
+export const addPago = async (data) => {
+  const { estado } = data;
+
+  const query = `
+    INSERT INTO Pagos (estado)
+    VALUES (?);
+  `;
+
+  const [result] = await promisePool.query(query, [estado]);
+
+  return result;
+};
