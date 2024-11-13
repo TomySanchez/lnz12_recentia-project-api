@@ -67,7 +67,7 @@ export const getAllPedidos = async (req, res) => {
 
 export const createPedido = async (req, res) => {
   try {
-    const { pedido: nuevoPedido, detallesPedido: nuevosDetallesPedido } =
+    const { pedido: nuevoPedido, detallesPedido: nuevosDetallesPedido = [] } =
       req.body;
 
     // Crear pedido:
